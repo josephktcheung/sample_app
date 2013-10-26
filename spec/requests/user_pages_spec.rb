@@ -5,10 +5,9 @@ describe "User pages" do
   subject { page }
 
   describe "index" do
-    before do
-      sign_in FactoryGirl.create(:user)
-      FactoryGirl.create(:user, name: "Bob", email: "bob@example.com")
-      FactoryGirl.create(:user, name: "Ben", email: "ben@example.com")
+    let!(:user) { FactoryGirl.create(:user) }
+    before(:each) do
+      sign_in user
       visit users_path
     end
 
@@ -16,7 +15,7 @@ describe "User pages" do
     it { should have_content('All users') }
 
     describe "pagination" do
-      before(:all) { 30.times {FactoryGirl.create(:user) } }
+      before(:all) { 30.times { FactoryGirl.create(:user) } }
       after(:all) { User.delete_all }
 
       it { should have_selector('div.pagination') }
@@ -64,6 +63,12 @@ describe "User pages" do
       it { should have_content(m1.content) }
       it { should have_content(m2.content) }
       it { should have_content(user.microposts.count) }
+    end
+
+    describe "as wrong user" do
+      let(:wrong_user) { FactoryGirl.create(:user) }
+
+      it { should_not have_link('delete') }
     end
   end
 
